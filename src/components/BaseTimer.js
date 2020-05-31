@@ -34,7 +34,7 @@ class BaseTimer extends Component {
 
   stopTimer = () => {
     clearInterval(this.timer);
-    this.setState({timerOn: false});
+    this.setState({ timerOn: false });
   };
 
   resetTimer = () => {
@@ -64,7 +64,7 @@ class BaseTimer extends Component {
     }
   };
 
-  adjustTimerButtons() {
+  getTimerAdjustButtons() {
     return (
       <div className="BaseTimer-display">{/*probably only display these when timer off*/}
         <button onClick={() => this.adjustTimer("incMinutes")}>&#8679;</button>
@@ -86,7 +86,7 @@ class BaseTimer extends Component {
         <div className="BaseTimer-time">
           {minutes} : {seconds}
         </div>
-        {this.adjustTimerButtons()}
+        {this.getTimerAdjustButtons()}
         <div className="BaseTimer-controls">
           {!timerOn && (timerStart === 0 || timerTime === timerStart) && (
             <button onClick={this.startTimer}>Start</button>
