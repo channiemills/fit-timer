@@ -3,7 +3,7 @@ import "../App.css";
 
 const MAX_DURATION = 5940000; // max duration 99 minutes
 const ONE_SECOND = 1000;
-const ONE_MINUTE = 60000;
+const ONE_MINUTE = 60 * ONE_SECOND;
 
 class BaseTimer extends Component {
   state = {
@@ -34,11 +34,11 @@ class BaseTimer extends Component {
 
   stopTimer = () => {
     clearInterval(this.timer);
-    this.setState({ timerOn: false });
+    this.setState({timerOn: false});
   };
 
   resetTimer = () => {
-    if (this.state.timerOn === false) {
+    if (!this.state.timerOn) {
       this.setState({
         timerTime: this.state.timerStart
       });
@@ -52,34 +52,33 @@ class BaseTimer extends Component {
     // think about how this needs to change since not using hours
     const { timerTime, timerOn } = this.state;
     if (!timerOn) { // possible switch statement? DRY this up
-      if (input === "incMinutes" && timerTime + 60000 < MAX_DURATION) {
-        this.setState({ timerTime: timerTime + 60000 });
-      } else if (input === "decMinutes" && timerTime - 60000 >= 0) {
-        this.setState({ timerTime: timerTime - 60000 });
-      } else if (input === "incSeconds" && timerTime + 1000 < MAX_DURATION) {
-        this.setState({ timerTime: timerTime + 1000 });
-      } else if (input === "decSeconds" && timerTime - 1000 >= 0) {
-        this.setState({ timerTime: timerTime - 1000 });
+      if (input === "incMinutes" && timerTime + ONE_MINUTE < MAX_DURATION) {
+        this.setState({ timerTime: timerTime + ONE_MINUTE });
+      } else if (input === "decMinutes" && timerTime - ONE_MINUTE >= 0) {
+        this.setState({ timerTime: timerTime - ONE_MINUTE });
+      } else if (input === "incSeconds" && timerTime + ONE_SECOND < MAX_DURATION) {
+        this.setState({ timerTime: timerTime + ONE_SECOND });
+      } else if (input === "decSeconds" && timerTime - ONE_SECOND >= 0) {
+        this.setState({ timerTime: timerTime - ONE_SECOND });
       }
     }
   };
 
-  getTimerButton(timerOn, timerStart, timerTime) {
-    if (timerOn && timerTime >= 1000) {
-      return (
-        (timerStart === 0 || timerStart === timerTime) && (
-          <button onClick={this.startTimer}>Start</button>
-        )
-      )}
+  adjustTimerButtons() {
     return (
-      {/*some jsx*/}
-    )
+      <div className="BaseTimer-display">{/*probably only display these when timer off*/}
+        <button onClick={() => this.adjustTimer("incMinutes")}>&#8679;</button>
+        <button onClick={() => this.adjustTimer("decMinutes")}>&#8681;</button>
+        <button onClick={() => this.adjustTimer("incSeconds")}>&#8679;</button>
+        <button onClick={() => this.adjustTimer("decSeconds")}>&#8681;</button>
+      </div>
+    );
   }
 
   render() {
     const { timerTime, timerStart, timerOn } = this.state;
-    let seconds = ("0" + (Math.floor((timerTime / 1000) % 60) % 60)).slice(-2);
-    let minutes = ("0" + Math.floor((timerTime / 60000) % 60)).slice(-2);
+    let seconds = ("0" + (Math.floor((timerTime / ONE_SECOND) % 60) % 60)).slice(-2);
+    let minutes = ("0" + Math.floor((timerTime / ONE_MINUTE) % 60)).slice(-2);
     return (
       <div className="BaseTimer">
         <div className="BaseTimer-header">Base Timer</div>
@@ -87,24 +86,19 @@ class BaseTimer extends Component {
         <div className="BaseTimer-time">
           {minutes} : {seconds}
         </div>
-        <div className="BaseTimer-display">{/*probably only display these when timer off*/}
-          <button onClick={() => this.adjustTimer("incMinutes")}>&#8679;</button>
-          <button onClick={() => this.adjustTimer("decMinutes")}>&#8681;</button>
-          <button onClick={() => this.adjustTimer("incSeconds")}>&#8679;</button>
-          <button onClick={() => this.adjustTimer("decSeconds")}>&#8681;</button>
-        </div>
+        {this.adjustTimerButtons()}
         <div className="BaseTimer-controls">
           {!timerOn && (timerStart === 0 || timerTime === timerStart) && (
             <button onClick={this.startTimer}>Start</button>
           )}
-          {timerOn && timerTime >= 1000 && (
+          {timerOn && timerTime >= ONE_SECOND && (
             <button onClick={this.stopTimer}>Stop</button>
           )}
           {!timerOn &&
             (timerStart !== 0 && timerStart !== timerTime && timerTime !== 0) && (
           <button onClick={this.startTimer}>Resume</button>
           )}
-          {(!timerOn || timerTime < 1000) &&
+          {(!timerOn || timerTime < ONE_SECOND) &&
             (timerStart !== timerTime && timerStart > 0) && (
               <button onClick={this.resetTimer}>Reset</button>
            )}
