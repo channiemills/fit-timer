@@ -9,25 +9,46 @@ class BaseTimer extends Component {
   state = {
     timerOn: false,
     timerStart: 0,
-    timerTime: 0
+    timerTime: 0,
+    countDown: true,
+    countUpTime: 0 // can this be DRYer? 
   };
 
   startTimer = () => {
-    this.setState({
-      timerOn: true,
-      timerTime: this.state.timerTime,
-      timerStart: this.state.timerTime
-    });
+    const { countDown } = this.state;
+
+    if (countDown) {
+      this.setState({
+        timerOn: true,
+        timerTime: this.state.timerTime,
+        timerStart: this.state.timerTime
+      });
+    } else {
+      this.setState({
+        timerOn: true,
+        timerTime: 0, // needs to be set because incrementing the duration changes timertime
+        countUpTime: this.state.timerTime // DRYer?
+      });
+    }
+
     this.timer = setInterval(() => {
-      const newTime = this.state.timerTime - 10;
-      if (newTime >= 0) {
+      // const newTime = this.state.timerTime - 10; // if countup do something else here...
+      let newTime;
+      if (countDown) {
+        newTime = this.state.timerTime - 10;
+      } else {
+        newTime = this.state.timerTime + 10;
+      }
+
+      // update time for countdown and countup
+      if ((countDown && newTime >= 0) || !countDown && newTime <= this.state.countUpTime) {
         this.setState({
           timerTime: newTime
         });
       } else {
-        clearInterval(this.timer);
-        this.setState({ timerOn: false });
-        alert("Countdown ended");
+          clearInterval(this.timer);
+          this.setState({ timerOn: false });
+          alert("Timer ended");
       }
     }, 10);
   };
@@ -75,7 +96,12 @@ class BaseTimer extends Component {
     );
   }
 
+  toggleCountDirection = () => {
+    this.setState({ countDown: false});
+  }
+
   render() {
+    // figure out why this render is being called 2x
     const { timerTime, timerStart, timerOn } = this.state;
     let seconds = ("0" + (Math.floor((timerTime / ONE_SECOND) % 60) % 60)).slice(-2);
     let minutes = ("0" + Math.floor((timerTime / ONE_MINUTE) % 60)).slice(-2);
@@ -102,6 +128,9 @@ class BaseTimer extends Component {
             (timerStart !== timerTime && timerStart > 0) && (
               <button onClick={this.resetTimer}>Reset</button>
            )}
+        </div>
+        <div>
+          <button onClick={this.toggleCountDirection}>{this.state.countDown? 'Count Up' : 'Count Down'}</button>
         </div>
       </div>
     );
