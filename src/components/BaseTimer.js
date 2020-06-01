@@ -15,24 +15,35 @@ class BaseTimer extends Component {
   };
 
   startTimer = () => {
-    const { countDown } = this.state;
+    const { countDown, timerTime, countUpTime } = this.state;
+
+    this.setState({ timerOn: true})
 
     if (countDown) {
       this.setState({
-        timerOn: true,
-        timerTime: this.state.timerTime,
-        timerStart: this.state.timerTime
+        // timerTime: this.state.timerTime, // is this necessary? shouldn't it be getting set when the time is set in theadjust timer fn?
+        timerStart: timerTime
       });
     } else {
-      this.setState({
-        timerOn: true,
-        timerTime: 0, // needs to be set because incrementing the duration changes timertime
-        countUpTime: this.state.timerTime // DRYer?
-      });
+
+        this.setState({
+          timerTime: countUpTime? timerTime : 0,
+          countUpTime: countUpTime? countUpTime : timerTime
+        })
+        // if (this.state.countUpTime) { // if it is being started from paused (should we have a paused flag???)
+        //   this.setState({
+        //     timerTime: timerTime
+        //   })
+
+        // } else { // if it is being started for the first time
+        //     this.setState({
+        //       timerTime: 0, // needs to be set because incrementing the duration changes timertime
+        //       countUpTime: timerTime // DRYer?
+        //     });
+        // }
     }
 
     this.timer = setInterval(() => {
-      // const newTime = this.state.timerTime - 10; // if countup do something else here...
       let newTime;
       if (countDown) {
         newTime = this.state.timerTime - 10;
@@ -41,13 +52,16 @@ class BaseTimer extends Component {
       }
 
       // update time for countdown and countup
-      if ((countDown && newTime >= 0) || !countDown && newTime <= this.state.countUpTime) {
+      if ((countDown && newTime >= 0) || (!countDown && newTime <= this.state.countUpTime)) {
         this.setState({
           timerTime: newTime
         });
       } else {
           clearInterval(this.timer);
-          this.setState({ timerOn: false });
+          this.setState({
+            timerOn: false,
+            countUpTime: 0 // so countup can be rerun
+          });
           alert("Timer ended");
       }
     }, 10);
