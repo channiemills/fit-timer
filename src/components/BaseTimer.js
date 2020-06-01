@@ -99,7 +99,7 @@ class BaseTimer extends Component {
   }
 
   toggleCountDirection = () => {
-    this.setState({ countDown: false});
+    this.setState({ countDown: !this.state.countDown}); //async risk?
   }
 
   render() {
