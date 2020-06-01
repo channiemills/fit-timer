@@ -11,7 +11,7 @@ class BaseTimer extends Component {
     timerStart: 0,
     timerTime: 0,
     countDown: true,
-    countUpTime: 0 // can this be DRYer? 
+    countUpTime: 0 // can this be DRYer?
   };
 
   startTimer = () => {
@@ -21,26 +21,14 @@ class BaseTimer extends Component {
 
     if (countDown) {
       this.setState({
-        // timerTime: this.state.timerTime, // is this necessary? shouldn't it be getting set when the time is set in theadjust timer fn?
         timerStart: timerTime
       });
     } else {
-
+        // using countUpTime to flag if starting from pause or new timer
         this.setState({
           timerTime: countUpTime? timerTime : 0,
           countUpTime: countUpTime? countUpTime : timerTime
         })
-        // if (this.state.countUpTime) { // if it is being started from paused (should we have a paused flag???)
-        //   this.setState({
-        //     timerTime: timerTime
-        //   })
-
-        // } else { // if it is being started for the first time
-        //     this.setState({
-        //       timerTime: 0, // needs to be set because incrementing the duration changes timertime
-        //       countUpTime: timerTime // DRYer?
-        //     });
-        // }
     }
 
     this.timer = setInterval(() => {
