@@ -65,7 +65,8 @@ class BaseTimer extends Component {
   resetTimer = () => {
     if (!this.state.timerOn) {
       this.setState({
-        currentTime: this.state.setTime // reset to setTime if currentTime != setTime, else 0?
+        currentTime: this.state.setTime,
+        setTime: 0,
       });
     }
   };
@@ -113,7 +114,7 @@ class BaseTimer extends Component {
         <div className="BaseTimer-time">
           {minutes} : {seconds}
         </div>
-        {this.getTimerAdjustButtons()}
+        {!timerOn && !setTime && this.getTimerAdjustButtons()}
         <div className="BaseTimer-controls">
           {!timerOn && (setTime === 0 || currentTime === setTime) && (
             <button onClick={this.startTimer}>Start</button>
@@ -126,7 +127,7 @@ class BaseTimer extends Component {
           <button onClick={this.startTimer}>Resume</button>
           )}
           {(!timerOn || currentTime < ONE_SECOND) &&
-            (setTime !== currentTime && setTime > 0) && (
+            (setTime !== currentTime) && (
               <button onClick={this.resetTimer}>Reset</button>
            )}
         </div>
