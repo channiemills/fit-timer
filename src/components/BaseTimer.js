@@ -9,40 +9,40 @@ class BaseTimer extends Component {
   state = {
     timerOn: false,
     timerStart: 0,
-    timerTime: 0,
-    countDown: true,
+    currentTime: 0,
+    countDown: true, // probably can go in redux, yikes
     countUpTime: 0 // can this be DRYer?
   };
 
   startTimer = () => {
-    const { countDown, timerTime, countUpTime } = this.state;
+    const { countDown, currentTime, countUpTime } = this.state;
 
-    this.setState({ timerOn: true})
+    this.setState({ timerOn: true });
 
     if (countDown) {
       this.setState({
-        timerStart: timerTime
+        timerStart: currentTime
       });
     } else {
         // using countUpTime to flag if starting from pause or new timer
         this.setState({
-          timerTime: countUpTime? timerTime : 0,
-          countUpTime: countUpTime? countUpTime : timerTime
-        })
+          currentTime: countUpTime? currentTime : 0,  // if countUpTime, that means it was paused and should use the currently displayed time to resume
+          countUpTime: countUpTime? countUpTime : currentTime // if countUpTime, that means it was paused and should use the count
+        });
     }
 
     this.timer = setInterval(() => {
       let newTime;
       if (countDown) {
-        newTime = this.state.timerTime - 10;
+        newTime = this.state.currentTime - 10;
       } else {
-        newTime = this.state.timerTime + 10;
+        newTime = this.state.currentTime + 10;
       }
 
       // update time for countdown and countup
       if ((countDown && newTime >= 0) || (!countDown && newTime <= this.state.countUpTime)) {
         this.setState({
-          timerTime: newTime
+          currentTime: newTime
         });
       } else {
           clearInterval(this.timer);
@@ -63,7 +63,7 @@ class BaseTimer extends Component {
   resetTimer = () => {
     if (!this.state.timerOn) {
       this.setState({
-        timerTime: this.state.timerStart
+        currentTime: this.state.timerStart
       });
     }
   };
@@ -73,16 +73,16 @@ class BaseTimer extends Component {
     // DRY. 
     // think about how this might have to change for count up
     // think about how this needs to change since not using hours
-    const { timerTime, timerOn } = this.state;
+    const { currentTime, timerOn } = this.state;
     if (!timerOn) { // possible switch statement? DRY this up
-      if (input === "incMinutes" && timerTime + ONE_MINUTE < MAX_DURATION) {
-        this.setState({ timerTime: timerTime + ONE_MINUTE });
-      } else if (input === "decMinutes" && timerTime - ONE_MINUTE >= 0) {
-        this.setState({ timerTime: timerTime - ONE_MINUTE });
-      } else if (input === "incSeconds" && timerTime + ONE_SECOND < MAX_DURATION) {
-        this.setState({ timerTime: timerTime + ONE_SECOND });
-      } else if (input === "decSeconds" && timerTime - ONE_SECOND >= 0) {
-        this.setState({ timerTime: timerTime - ONE_SECOND });
+      if (input === "incMinutes" && currentTime + ONE_MINUTE < MAX_DURATION) {
+        this.setState({ currentTime: currentTime + ONE_MINUTE });
+      } else if (input === "decMinutes" && currentTime - ONE_MINUTE >= 0) {
+        this.setState({ currentTime: currentTime - ONE_MINUTE });
+      } else if (input === "incSeconds" && currentTime + ONE_SECOND < MAX_DURATION) {
+        this.setState({ currentTime: currentTime + ONE_SECOND });
+      } else if (input === "decSeconds" && currentTime - ONE_SECOND >= 0) {
+        this.setState({ currentTime: currentTime - ONE_SECOND });
       }
     }
   };
@@ -104,9 +104,9 @@ class BaseTimer extends Component {
 
   render() {
     // figure out why this render is being called 2x
-    const { timerTime, timerStart, timerOn } = this.state;
-    let seconds = ("0" + (Math.floor((timerTime / ONE_SECOND) % 60) % 60)).slice(-2);
-    let minutes = ("0" + Math.floor((timerTime / ONE_MINUTE) % 60)).slice(-2);
+    const { currentTime, timerStart, timerOn } = this.state;
+    let seconds = ("0" + (Math.floor((currentTime / ONE_SECOND) % 60) % 60)).slice(-2);
+    let minutes = ("0" + Math.floor((currentTime / ONE_MINUTE) % 60)).slice(-2);
     return (
       <div className="BaseTimer">
         <div className="BaseTimer-header">Base Timer</div>
@@ -116,18 +116,18 @@ class BaseTimer extends Component {
         </div>
         {this.getTimerAdjustButtons()}
         <div className="BaseTimer-controls">
-          {!timerOn && (timerStart === 0 || timerTime === timerStart) && (
+          {!timerOn && (timerStart === 0 || currentTime === timerStart) && (
             <button onClick={this.startTimer}>Start</button>
           )}
-          {timerOn && timerTime >= ONE_SECOND && (
+          {timerOn && currentTime >= ONE_SECOND && (
             <button onClick={this.stopTimer}>Stop</button>
           )}
           {!timerOn &&
-            (timerStart !== 0 && timerStart !== timerTime && timerTime !== 0) && (
+            (timerStart !== 0 && timerStart !== currentTime && currentTime !== 0) && (
           <button onClick={this.startTimer}>Resume</button>
           )}
-          {(!timerOn || timerTime < ONE_SECOND) &&
-            (timerStart !== timerTime && timerStart > 0) && (
+          {(!timerOn || currentTime < ONE_SECOND) &&
+            (timerStart !== currentTime && timerStart > 0) && (
               <button onClick={this.resetTimer}>Reset</button>
            )}
         </div>
