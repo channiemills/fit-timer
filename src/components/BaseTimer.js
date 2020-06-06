@@ -8,39 +8,54 @@ const ONE_MINUTE = 60 * ONE_SECOND;
 class BaseTimer extends Component {
   state = {
     timerOn: false,
-    timerStart: 0,
-    currentTime: 0,
     countDown: true, // probably can go in redux, yikes
+    setTime: 0,
+    currentTime: 0,
     countUpTime: 0 // can this be DRYer?
   };
 
   startTimer = () => {
-    const { countDown, currentTime, countUpTime } = this.state;
+    const { countDown, currentTime, countUpTime, setTime } = this.state;
 
-    this.setState({ timerOn: true });
+    this.setState({
+      timerOn: true,
+      setTime: setTime? setTime : currentTime, // Always want the set time to be what the clock was orignally set for. Think about how not to overwrite this when paused
+    });
 
-    if (countDown) {
+    // if (countDown) {
+    //   this.setState({
+    //     setTime: currentTime
+    //   });
+    // } else {
+    //     // using countUpTime to flag if starting from pause or new timer
+    //     this.setState({
+    //       currentTime: countUpTime? currentTime : 0,  // if countUpTime, that means it was paused and should use the currently displayed time to resume
+    //       countUpTime: countUpTime? countUpTime : currentTime // here is where we're setting the setTime if there isn't one already...
+    //     });
+    // }
+    if (!countDown) {
+      console.log('set time');
+      console.log(this.state.setTime);
       this.setState({
-        timerStart: currentTime
+        currentTime: setTime? currentTime : 0, // this is causing a bug when resetting countUp
       });
-    } else {
-        // using countUpTime to flag if starting from pause or new timer
-        this.setState({
-          currentTime: countUpTime? currentTime : 0,  // if countUpTime, that means it was paused and should use the currently displayed time to resume
-          countUpTime: countUpTime? countUpTime : currentTime // if countUpTime, that means it was paused and should use the count
-        });
-    }
+    };
 
+    console.log(this.state.setTime);
     this.timer = setInterval(() => {
+      // console.log('curentTime');
+      // console.log(currentTime);
       let newTime;
       if (countDown) {
         newTime = this.state.currentTime - 10;
       } else {
         newTime = this.state.currentTime + 10;
       }
+      // console.log('newTime');
+      // console.log(newTime)
 
       // update time for countdown and countup
-      if ((countDown && newTime >= 0) || (!countDown && newTime <= this.state.countUpTime)) {
+      if ((countDown && newTime >= 0) || (!countDown && newTime <= this.state.setTime)) {
         this.setState({
           currentTime: newTime
         });
@@ -48,7 +63,7 @@ class BaseTimer extends Component {
           clearInterval(this.timer);
           this.setState({
             timerOn: false,
-            countUpTime: 0 // so countup can be rerun
+            setTime: 0 // so countup can be rerun
           });
           alert("Timer ended");
       }
@@ -63,7 +78,7 @@ class BaseTimer extends Component {
   resetTimer = () => {
     if (!this.state.timerOn) {
       this.setState({
-        currentTime: this.state.timerStart
+        currentTime: this.state.setTime // reset to setTime if currentTime != setTime, else 0?
       });
     }
   };
@@ -104,7 +119,7 @@ class BaseTimer extends Component {
 
   render() {
     // figure out why this render is being called 2x
-    const { currentTime, timerStart, timerOn } = this.state;
+    const { currentTime, setTime, timerOn } = this.state;
     let seconds = ("0" + (Math.floor((currentTime / ONE_SECOND) % 60) % 60)).slice(-2);
     let minutes = ("0" + Math.floor((currentTime / ONE_MINUTE) % 60)).slice(-2);
     return (
@@ -116,18 +131,18 @@ class BaseTimer extends Component {
         </div>
         {this.getTimerAdjustButtons()}
         <div className="BaseTimer-controls">
-          {!timerOn && (timerStart === 0 || currentTime === timerStart) && (
+          {!timerOn && (setTime === 0 || currentTime === setTime) && (
             <button onClick={this.startTimer}>Start</button>
           )}
           {timerOn && currentTime >= ONE_SECOND && (
             <button onClick={this.stopTimer}>Stop</button>
           )}
           {!timerOn &&
-            (timerStart !== 0 && timerStart !== currentTime && currentTime !== 0) && (
+            (setTime !== 0 && setTime !== currentTime && currentTime !== 0) && (
           <button onClick={this.startTimer}>Resume</button>
           )}
           {(!timerOn || currentTime < ONE_SECOND) &&
-            (timerStart !== currentTime && timerStart > 0) && (
+            (setTime !== currentTime && setTime > 0) && (
               <button onClick={this.resetTimer}>Reset</button>
            )}
         </div>
