@@ -8,51 +8,38 @@ const ONE_MINUTE = 60 * ONE_SECOND;
 class BaseTimer extends Component {
   state = {
     timerOn: false,
-    countDown: true, // probably can go in redux, yikes
+    countDown: true, // probably can go in redux to be shared in other Timers
     setTime: 0,
     currentTime: 0,
-    countUpTime: 0 // can this be DRYer?
   };
 
   startTimer = () => {
-    const { countDown, currentTime, countUpTime, setTime } = this.state;
+    const { countDown, currentTime, setTime } = this.state;
+    const newSetTime = setTime? setTime : currentTime;
+    let currentCountUpTime;
+
+    if (!countDown) {
+      currentCountUpTime = setTime? currentTime : 0;
+      // currentCountUpTime logic -> if starting for 1st time, currentTime must be 0. When starting from pause, should be currentTime
+      // may still need some kind of flag for set but paused, but that should be capturable from setTime
+      // can also consider another button for clearing everything
+    }
+
 
     this.setState({
       timerOn: true,
-      setTime: setTime? setTime : currentTime, // Always want the set time to be what the clock was orignally set for. Think about how not to overwrite this when paused
+      setTime: newSetTime, // Always want the set time to be what the clock was orignally set for. Think about how not to overwrite this when paused
+      currentTime: currentCountUpTime != null? currentCountUpTime : currentTime,
     });
 
-    // if (countDown) {
-    //   this.setState({
-    //     setTime: currentTime
-    //   });
-    // } else {
-    //     // using countUpTime to flag if starting from pause or new timer
-    //     this.setState({
-    //       currentTime: countUpTime? currentTime : 0,  // if countUpTime, that means it was paused and should use the currently displayed time to resume
-    //       countUpTime: countUpTime? countUpTime : currentTime // here is where we're setting the setTime if there isn't one already...
-    //     });
-    // }
-    if (!countDown) {
-      console.log('set time');
-      console.log(this.state.setTime);
-      this.setState({
-        currentTime: setTime? currentTime : 0, // this is causing a bug when resetting countUp
-      });
-    };
 
-    console.log(this.state.setTime);
     this.timer = setInterval(() => {
-      // console.log('curentTime');
-      // console.log(currentTime);
       let newTime;
       if (countDown) {
         newTime = this.state.currentTime - 10;
       } else {
         newTime = this.state.currentTime + 10;
       }
-      // console.log('newTime');
-      // console.log(newTime)
 
       // update time for countdown and countup
       if ((countDown && newTime >= 0) || (!countDown && newTime <= this.state.setTime)) {
@@ -83,11 +70,8 @@ class BaseTimer extends Component {
     }
   };
 
-  adjustTimer = input => { // clean this up. 
-    // input syntax.
-    // DRY. 
-    // think about how this might have to change for count up
-    // think about how this needs to change since not using hours
+  adjustTimer(input) { 
+    // DRY?
     const { currentTime, timerOn } = this.state;
     if (!timerOn) { // possible switch statement? DRY this up
       if (input === "incMinutes" && currentTime + ONE_MINUTE < MAX_DURATION) {
