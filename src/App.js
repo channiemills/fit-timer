@@ -1,6 +1,6 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import BaseTimer from "./components/BaseTimer";
+import BaseTimer from './components/BaseTimer';
 
 class App extends Component {
   render() {
@@ -11,7 +11,7 @@ class App extends Component {
           <BaseTimer />
         </div>
       </div>
-    )
+    );
   }
 }
 
