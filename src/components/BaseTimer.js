@@ -41,7 +41,6 @@ class BaseTimer extends Component {
       // can also consider another button for clearing everything
     }
 
-
     this.setState({
       timerOn: true,
       setTime: newSetTime,
@@ -50,17 +49,16 @@ class BaseTimer extends Component {
       currentTime: currentCountUpTime != null ? currentCountUpTime : currentTime,
     });
 
-
     this.timer = setInterval(() => {
       let newTime;
       if (countDown) {
-        newTime = currentTime - 10;
+        newTime = this.state.currentTime - 10;
       } else {
-        newTime = currentTime + 10;
+        newTime = this.state.currentTime + 10;
       }
 
       // update time for countdown and countup
-      if ((countDown && newTime >= 0) || (!countDown && newTime <= setTime)) {
+      if ((countDown && newTime >= 0) || (!countDown && newTime <= this.state.setTime)) {
         this.setState({
           currentTime: newTime,
         });
