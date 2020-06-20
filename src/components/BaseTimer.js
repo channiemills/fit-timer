@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Tone from 'tone';
 import '../App.css';
 
 const MAX_DURATION = 5940000; // max duration 99 minutes
@@ -14,6 +15,8 @@ class BaseTimer extends Component {
       setTime: 0,
       currentTime: 0,
     };
+
+    this.synth = new Tone.Synth().toMaster();
   }
 
   getTimerAdjustButtons() {
@@ -63,13 +66,19 @@ class BaseTimer extends Component {
         this.setState({
           currentTime: newTime,
         });
+        // eslint-disable-next-line react/destructuring-assignment
+        const remainingTime = countDown ? newTime : this.state.setTime - newTime;
+        const beepTimes = [3 * ONE_SECOND, 2 * ONE_SECOND, ONE_SECOND];
+        if (beepTimes.includes(remainingTime)) {
+          this.beep('C4', '8n');
+        }
       } else {
+        this.beep('C5', '4n');
         clearInterval(this.timer);
         this.setState({
           timerOn: false,
           setTime: 0, // so countup can be rerun
         });
-        alert('Timer ended');
       }
     }, 10);
   };
@@ -92,6 +101,10 @@ class BaseTimer extends Component {
   toggleCountDirection = () => {
     const { countDown } = this.state;
     this.setState({ countDown: !countDown }); // async risk?
+  }
+
+  beep(note, duration) {
+    this.synth.triggerAttackRelease(note, duration);
   }
 
   adjustTimer(input) {
