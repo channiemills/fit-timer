@@ -122,7 +122,7 @@ class BaseTimer extends Component {
         <div className="BaseTimer-header">Base Timer</div>
         <div className="BaseTimer-time">
           {minutes}
-          :
+          { ' : ' }
           {seconds}
         </div>
         {!timerOn && !setTime && this.getTimerAdjustButtons()}
