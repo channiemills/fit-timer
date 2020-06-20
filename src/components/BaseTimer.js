@@ -52,12 +52,13 @@ class BaseTimer extends Component {
     this.timer = setInterval(() => {
       let newTime;
       if (countDown) {
-        newTime = this.state.currentTime - 10;
+        newTime = this.state.currentTime - 10; // eslint-disable-line react/destructuring-assignment
       } else {
-        newTime = this.state.currentTime + 10;
+        newTime = this.state.currentTime + 10; // eslint-disable-line react/destructuring-assignment
       }
 
       // update time for countdown and countup
+      // eslint-disable-next-line react/destructuring-assignment
       if ((countDown && newTime >= 0) || (!countDown && newTime <= this.state.setTime)) {
         this.setState({
           currentTime: newTime,
@@ -114,12 +115,16 @@ class BaseTimer extends Component {
     const {
       currentTime, setTime, timerOn, countDown,
     } = this.state;
-    const seconds = ('0' + (Math.floor((currentTime / ONE_SECOND) % 60) % 60)).slice(-2);
-    const minutes = ('0' + Math.floor((currentTime / ONE_MINUTE) % 60)).slice(-2);
+    const seconds = `0${(Math.floor((currentTime / ONE_SECOND) % 60) % 60)}`.slice(-2);
+    const minutes = `0${Math.floor((currentTime / ONE_MINUTE) % 60)}`.slice(-2);
     return (
       <div className="BaseTimer">
         <div className="BaseTimer-header">Base Timer</div>
-        <div className="BaseTimer-time">{minutes} : {seconds}</div>
+        <div className="BaseTimer-time">
+          {minutes}
+          :
+          {seconds}
+        </div>
         {!timerOn && !setTime && this.getTimerAdjustButtons()}
         <div className="BaseTimer-controls">
           {!timerOn && (setTime === 0 || currentTime === setTime) && (
